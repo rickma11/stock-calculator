@@ -297,6 +297,30 @@
                     </div>
                 </div>
             </div>
+
+            <div class="section">
+                <div class="section-title">今日涨跌停计算</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>今日初始价（元）</label>
+                        <input type="number" id="todayPrice" placeholder="例如：10.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>股票类型</label>
+                        <select id="stockType">
+                            <option value="main">主板（±10%）</option>
+                            <option value="growth">创业板/科创板（±20%）</option>
+                            <option value="st">ST股票（±5%）</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateLimit()" style="margin-top: 0;">计算涨跌停</button>
+                <div id="limitResults" class="results" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        请输入今日初始价后点击计算按钮
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -383,6 +407,60 @@
                 <div class="summary">
                     <div class="summary-title">📝 交易摘要</div>
                     <div class="summary-content">${tradeSummary}</div>
+                </div>
+            `;
+        }
+
+        function calculateLimit() {
+            const todayPrice = parseFloat(document.getElementById('todayPrice').value);
+            const stockType = document.getElementById('stockType').value;
+
+            if (isNaN(todayPrice) || todayPrice <= 0) {
+                alert('请输入有效的今日初始价');
+                return;
+            }
+
+            let limitPercent;
+            switch (stockType) {
+                case 'main':
+                    limitPercent = 0.10;
+                    break;
+                case 'growth':
+                    limitPercent = 0.20;
+                    break;
+                case 'st':
+                    limitPercent = 0.05;
+                    break;
+                default:
+                    limitPercent = 0.10;
+            }
+
+            const limitUp = todayPrice * (1 + limitPercent);
+            const limitDown = todayPrice * (1 - limitPercent);
+
+            const limitResultsDiv = document.getElementById('limitResults');
+            limitResultsDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">今日初始价</span>
+                    <span class="result-value highlight">${todayPrice.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">涨停价（+${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value profit">${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">跌停价（-${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value loss">${limitDown.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">价格区间</span>
+                    <span class="result-value">${limitDown.toFixed(2)} ~ ${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="summary">
+                    <div class="summary-title">📝 说明</div>
+                    <div class="summary-content">
+                        今日初始价为 ${todayPrice.toFixed(2)} 元，根据${stockType === 'main' ? '主板' : stockType === 'growth' ? '创业板/科创板' : 'ST'}股票涨跌幅限制（±${(limitPercent * 100).toFixed(0)}%），今日涨停价为 ${limitUp.toFixed(2)} 元，跌停价为 ${limitDown.toFixed(2)} 元。
+                    </div>
                 </div>
             `;
         }
