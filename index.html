@@ -47,6 +47,26 @@
             font-size: 14px;
         }
 
+        .commodity-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+        }
+
         .content {
             padding: 30px;
         }
@@ -297,6 +317,40 @@
                     </div>
                 </div>
             </div>
+
+            <div class="section">
+                <div class="section-title">今日涨跌停计算</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>今日初始价（元）</label>
+                        <input type="number" id="todayPrice" placeholder="例如：10.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>股票类型</label>
+                        <select id="stockType">
+                            <option value="main">主板（±10%）</option>
+                            <option value="growth">创业板/科创板（±20%）</option>
+                            <option value="st">ST股票（±5%）</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateLimit()" style="margin-top: 0;">计算涨跌停</button>
+                <div id="limitResults" class="results" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        请输入今日初始价后点击计算按钮
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">实时大宗商品价格</div>
+                <button class="btn" onclick="fetchCommodityPrices()" style="margin-top: 0;">获取实时价格</button>
+                <div id="commodityResults" class="results" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        点击按钮获取实时油价、金价、银铜价格
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -385,6 +439,141 @@
                     <div class="summary-content">${tradeSummary}</div>
                 </div>
             `;
+        }
+
+        function calculateLimit() {
+            const todayPrice = parseFloat(document.getElementById('todayPrice').value);
+            const stockType = document.getElementById('stockType').value;
+
+            if (isNaN(todayPrice) || todayPrice <= 0) {
+                alert('请输入有效的今日初始价');
+                return;
+            }
+
+            let limitPercent;
+            switch (stockType) {
+                case 'main':
+                    limitPercent = 0.10;
+                    break;
+                case 'growth':
+                    limitPercent = 0.20;
+                    break;
+                case 'st':
+                    limitPercent = 0.05;
+                    break;
+                default:
+                    limitPercent = 0.10;
+            }
+
+            const limitUp = todayPrice * (1 + limitPercent);
+            const limitDown = todayPrice * (1 - limitPercent);
+
+            const limitResultsDiv = document.getElementById('limitResults');
+            limitResultsDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">今日初始价</span>
+                    <span class="result-value highlight">${todayPrice.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">涨停价（+${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value profit">${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">跌停价（-${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value loss">${limitDown.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">价格区间</span>
+                    <span class="result-value">${limitDown.toFixed(2)} ~ ${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="summary">
+                    <div class="summary-title">📝 说明</div>
+                    <div class="summary-content">
+                        今日初始价为 ${todayPrice.toFixed(2)} 元，根据${stockType === 'main' ? '主板' : stockType === 'growth' ? '创业板/科创板' : 'ST'}股票涨跌幅限制（±${(limitPercent * 100).toFixed(0)}%），今日涨停价为 ${limitUp.toFixed(2)} 元，跌停价为 ${limitDown.toFixed(2)} 元。
+                    </div>
+                </div>
+            `;
+        }
+
+        async function fetchCommodityPrices() {
+            const commodityResultsDiv = document.getElementById('commodityResults');
+            commodityResultsDiv.innerHTML = '<div class="empty-state">正在获取实时价格...</div>';
+
+            try {
+                const response = await fetch('https://api.metals.live/v1/spot/all');
+                const data = await response.json();
+                
+                const goldPrice = data.gold.price;
+                const silverPrice = data.silver.price;
+                const copperPrice = data.copper.price;
+                
+                const oilResponse = await fetch('https://api.oilpriceapi.com/v1/latest');
+                const oilData = await oilResponse.json();
+                const oilPrice = oilData.brent;
+
+                const updateTime = new Date().toLocaleString('zh-CN');
+
+                commodityResultsDiv.innerHTML = `
+                    <div class="result-item">
+                        <span class="result-label">🛢️ 布伦特原油</span>
+                        <span class="result-value highlight">${oilPrice.toFixed(2)} 美元/桶</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🥇 黄金 (XAU)</span>
+                        <span class="result-value profit">${goldPrice.toFixed(2)} 美元/盎司</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🥈 白银 (XAG)</span>
+                        <span class="result-value">${silverPrice.toFixed(2)} 美元/盎司</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🔶 铜</span>
+                        <span class="result-value loss">${copperPrice.toFixed(2)} 美元/磅</span>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-title">📝 更新时间</div>
+                        <div class="summary-content">${updateTime}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('获取价格失败:', error);
+                
+                const mockData = {
+                    oil: 78.50,
+                    gold: 2025.30,
+                    silver: 23.45,
+                    copper: 4.32
+                };
+                
+                const updateTime = new Date().toLocaleString('zh-CN');
+
+                commodityResultsDiv.innerHTML = `
+                    <div class="result-item">
+                        <span class="result-label">🛢️ 布伦特原油</span>
+                        <span class="result-value highlight">${mockData.oil.toFixed(2)} 美元/桶</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🥇 黄金 (XAU)</span>
+                        <span class="result-value profit">${mockData.gold.toFixed(2)} 美元/盎司</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🥈 白银 (XAG)</span>
+                        <span class="result-value">${mockData.silver.toFixed(2)} 美元/盎司</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🔶 铜</span>
+                        <span class="result-value loss">${mockData.copper.toFixed(2)} 美元/磅</span>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-title">📝 更新时间</div>
+                        <div class="summary-content">${updateTime}</div>
+                    </div>
+                    <div class="summary" style="margin-top: 10px; border-left-color: #ef4444;">
+                        <div class="summary-title">⚠️ 注意</div>
+                        <div class="summary-content">当前显示为模拟数据。如需获取实时价格，请配置相应的API接口。</div>
+                    </div>
+                `;
+            }
         }
 
         document.querySelectorAll('input').forEach(input => {
