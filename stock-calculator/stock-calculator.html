@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票买卖计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+        }
+
+        .radio-option.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .radio-option input {
+            display: none;
+        }
+
+        .radio-option span {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value.highlight {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        .result-value.profit {
+            color: #10b981;
+        }
+
+        .result-value.loss {
+            color: #ef4444;
+        }
+
+        .summary {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .summary-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 股票买卖计算器</h1>
+            <p>计算买卖后的成本价、盈亏情况和持仓市值</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">当前持仓信息</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>当前成本价（元）</label>
+                        <input type="number" id="currentCost" placeholder="例如：10.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>当前持有数量（股）</label>
+                        <input type="number" id="currentQuantity" placeholder="例如：1000" step="1" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">交易信息</div>
+                <div class="form-group">
+                    <label>交易类型</label>
+                    <div class="radio-group">
+                        <div class="radio-option active" data-type="buy">
+                            <input type="radio" name="tradeType" value="buy" checked>
+                            <span>买入</span>
+                        </div>
+                        <div class="radio-option" data-type="sell">
+                            <input type="radio" name="tradeType" value="sell">
+                            <span>卖出</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>交易价格（元）</label>
+                        <input type="number" id="tradePrice" placeholder="例如：12.50" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>交易数量（股）</label>
+                        <input type="number" id="tradeQuantity" placeholder="例如：500" step="1" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculate()">计算</button>
+
+            <div class="section">
+                <div class="section-title">计算结果</div>
+                <div id="results" class="results">
+                    <div class="empty-state">
+                        请填写完整信息后点击计算按钮
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">今日涨跌停计算</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>今日初始价（元）</label>
+                        <input type="number" id="todayPrice" placeholder="例如：10.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>股票类型</label>
+                        <select id="stockType">
+                            <option value="main">主板（±10%）</option>
+                            <option value="growth">创业板/科创板（±20%）</option>
+                            <option value="st">ST股票（±5%）</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateLimit()" style="margin-top: 0;">计算涨跌停</button>
+                <div id="limitResults" class="results" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        请输入今日初始价后点击计算按钮
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tradeType = 'buy';
+
+        document.querySelectorAll('.radio-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                this.querySelector('input').checked = true;
+                tradeType = this.dataset.type;
+            });
+        });
+
+        function calculate() {
+            const currentCost = parseFloat(document.getElementById('currentCost').value);
+            const currentQuantity = parseInt(document.getElementById('currentQuantity').value);
+            const tradePrice = parseFloat(document.getElementById('tradePrice').value);
+            const tradeQuantity = parseInt(document.getElementById('tradeQuantity').value);
+
+            if (isNaN(currentCost) || isNaN(currentQuantity) || isNaN(tradePrice) || isNaN(tradeQuantity)) {
+                alert('请填写所有必填项');
+                return;
+            }
+
+            if (currentQuantity <= 0) {
+                alert('当前持有数量必须大于0');
+                return;
+            }
+
+            if (tradeQuantity <= 0) {
+                alert('交易数量必须大于0');
+                return;
+            }
+
+            if (tradeType === 'sell' && tradeQuantity > currentQuantity) {
+                alert('卖出数量不能大于当前持有数量');
+                return;
+            }
+
+            let newCost, newQuantity, profit, profitPercent, marketValue, tradeSummary;
+
+            if (tradeType === 'buy') {
+                newQuantity = currentQuantity + tradeQuantity;
+                newCost = (currentCost * currentQuantity + tradePrice * tradeQuantity) / newQuantity;
+                profit = 0;
+                profitPercent = 0;
+                marketValue = newCost * newQuantity;
+                tradeSummary = `买入 ${tradeQuantity} 股 @ ${tradePrice.toFixed(2)} 元，成本价从 ${currentCost.toFixed(2)} 元变为 ${newCost.toFixed(2)} 元`;
+            } else {
+                profit = (tradePrice - currentCost) * tradeQuantity;
+                profitPercent = ((tradePrice - currentCost) / currentCost * 100);
+                newQuantity = currentQuantity - tradeQuantity;
+                if (newQuantity > 0) {
+                    const totalCost = currentCost * currentQuantity;
+                    const remainingCost = totalCost - tradePrice * tradeQuantity;
+                    newCost = remainingCost / newQuantity;
+                } else {
+                    newCost = 0;
+                }
+                marketValue = newQuantity > 0 ? newCost * newQuantity : 0;
+                tradeSummary = `卖出 ${tradeQuantity} 股 @ ${tradePrice.toFixed(2)} 元，盈亏 ${profit >= 0 ? '+' : ''}${profit.toFixed(2)} 元 (${profitPercent >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%)`;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">新成本价</span>
+                    <span class="result-value highlight">${newCost > 0 ? newCost.toFixed(2) + ' 元' : '-'}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">新持有数量</span>
+                    <span class="result-value">${newQuantity} 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">持仓市值</span>
+                    <span class="result-value">${marketValue > 0 ? marketValue.toFixed(2) + ' 元' : '-'}</span>
+                </div>
+                ${tradeType === 'sell' ? `
+                <div class="result-item">
+                    <span class="result-label">盈亏金额</span>
+                    <span class="result-value ${profit >= 0 ? 'profit' : 'loss'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">盈亏比例</span>
+                    <span class="result-value ${profitPercent >= 0 ? 'profit' : 'loss'}">${profitPercent >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%</span>
+                </div>
+                ` : ''}
+                <div class="summary">
+                    <div class="summary-title">📝 交易摘要</div>
+                    <div class="summary-content">${tradeSummary}</div>
+                </div>
+            `;
+        }
+
+        function calculateLimit() {
+            const todayPrice = parseFloat(document.getElementById('todayPrice').value);
+            const stockType = document.getElementById('stockType').value;
+
+            if (isNaN(todayPrice) || todayPrice <= 0) {
+                alert('请输入有效的今日初始价');
+                return;
+            }
+
+            let limitPercent;
+            switch (stockType) {
+                case 'main':
+                    limitPercent = 0.10;
+                    break;
+                case 'growth':
+                    limitPercent = 0.20;
+                    break;
+                case 'st':
+                    limitPercent = 0.05;
+                    break;
+                default:
+                    limitPercent = 0.10;
+            }
+
+            const limitUp = todayPrice * (1 + limitPercent);
+            const limitDown = todayPrice * (1 - limitPercent);
+
+            const limitResultsDiv = document.getElementById('limitResults');
+            limitResultsDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">今日初始价</span>
+                    <span class="result-value highlight">${todayPrice.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">涨停价（+${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value profit">${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">跌停价（-${(limitPercent * 100).toFixed(0)}%）</span>
+                    <span class="result-value loss">${limitDown.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">价格区间</span>
+                    <span class="result-value">${limitDown.toFixed(2)} ~ ${limitUp.toFixed(2)} 元</span>
+                </div>
+                <div class="summary">
+                    <div class="summary-title">📝 说明</div>
+                    <div class="summary-content">
+                        今日初始价为 ${todayPrice.toFixed(2)} 元，根据${stockType === 'main' ? '主板' : stockType === 'growth' ? '创业板/科创板' : 'ST'}股票涨跌幅限制（±${(limitPercent * 100).toFixed(0)}%），今日涨停价为 ${limitUp.toFixed(2)} 元，跌停价为 ${limitDown.toFixed(2)} 元。
+                    </div>
+                </div>
+            `;
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculate();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
