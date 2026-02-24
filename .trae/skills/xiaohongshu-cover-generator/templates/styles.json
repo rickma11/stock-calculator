@@ -1,0 +1,115 @@
+{
+  "简约清新风": {
+    "name": "简约清新风",
+    "description": "干净简洁的设计风格",
+    "background": {
+      "type": "solid",
+      "color": "#F5F5F5"
+    },
+    "title": {
+      "font_size": 80,
+      "font_weight": "bold",
+      "color": "#1F2937",
+      "alignment": "center",
+      "y_position": 400
+    },
+    "keywords": {
+      "font_size": 30,
+      "color": "#6B7280",
+      "alignment": "center",
+      "separator": " | ",
+      "y_position": 550
+    },
+    "decorations": []
+  },
+  "高饱和度吸睛风": {
+    "name": "高饱和度吸睛风",
+    "description": "鲜艳色彩吸引眼球",
+    "background": {
+      "type": "solid",
+      "colors": ["#FF6B6B", "#FF8E53", "#FFCE56", "#4ECDC4", "#45B7D1"],
+      "random": true
+    },
+    "title": {
+      "font_size": 90,
+      "font_weight": "bold",
+      "color": "#FFFFFF",
+      "alignment": "center",
+      "y_position": 350
+    },
+    "keywords": {
+      "font_size": 35,
+      "color": "#FFFFFF",
+      "alignment": "horizontal",
+      "spacing": 300,
+      "y_position": 550
+    },
+    "decorations": [
+      {
+        "type": "circle",
+        "position": "top_right",
+        "color": "rgba(255,255,255,0.2)",
+        "size": 200
+      }
+    ]
+  },
+  "渐变背景风": {
+    "name": "渐变背景风",
+    "description": "使用渐变色背景",
+    "background": {
+      "type": "gradient",
+      "direction": "vertical",
+      "colors": ["#8B5CF6", "#A78BFA"]
+    },
+    "title": {
+      "font_size": 85,
+      "font_weight": "bold",
+      "color": "#FFFFFF",
+      "alignment": "center",
+      "y_position": 400
+    },
+    "keywords": {
+      "font_size": 40,
+      "color": "#FFFFFF",
+      "alignment": "center",
+      "separator": " · ",
+      "y_position": 580
+    },
+    "decorations": []
+  },
+  "图文混排风": {
+    "name": "图文混排风",
+    "description": "文字和图片混合排版",
+    "background": {
+      "type": "gradient",
+      "direction": "vertical",
+      "colors": ["#3B82F6", "#60A5FA"]
+    },
+    "header": {
+      "type": "banner",
+      "background": "rgba(255,255,255,0.9)",
+      "text": "小红书",
+      "color": "#3B82F6",
+      "y_position": 50,
+      "height": 150
+    },
+    "title": {
+      "font_size": 80,
+      "font_weight": "bold",
+      "color": "#FFFFFF",
+      "alignment": "center",
+      "y_position": 400
+    },
+    "keywords": {
+      "font_size": 30,
+      "color": "#FFFFFF",
+      "alignment": "cards",
+      "card_background": "rgba(255,255,255,0.15)",
+      "card_width": 200,
+      "card_height": 60,
+      "spacing": 80,
+      "y_position": 600
+    },
+    "decorations": []
+  }
+}

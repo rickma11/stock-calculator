@@ -1,0 +1,72 @@
+{
+  "紫色渐变": {
+    "name": "紫色渐变",
+    "primary": "#8B5CF6",
+    "secondary": "#A78BFA",
+    "text": "#FFFFFF",
+    "description": "神秘优雅的紫色渐变"
+  },
+  "蓝色渐变": {
+    "name": "蓝色渐变",
+    "primary": "#3B82F6",
+    "secondary": "#60A5FA",
+    "text": "#FFFFFF",
+    "description": "清新专业的蓝色渐变"
+  },
+  "橙红渐变": {
+    "name": "橙红渐变",
+    "primary": "#F97316",
+    "secondary": "#FB923C",
+    "text": "#FFFFFF",
+    "description": "活力热情的橙红渐变"
+  },
+  "粉色渐变": {
+    "name": "粉色渐变",
+    "primary": "#EC4899",
+    "secondary": "#F472B6",
+    "text": "#FFFFFF",
+    "description": "甜美温柔的粉色渐变"
+  },
+  "绿色渐变": {
+    "name": "绿色渐变",
+    "primary": "#10B981",
+    "secondary": "#34D399",
+    "text": "#FFFFFF",
+    "description": "清新自然的绿色渐变"
+  },
+  "简约黑白": {
+    "name": "简约黑白",
+    "primary": "#FFFFFF",
+    "secondary": "#F3F4F6",
+    "text": "#1F2937",
+    "description": "经典简约的黑白配色"
+  },
+  "深紫渐变": {
+    "name": "深紫渐变",
+    "primary": "#6B21A8",
+    "secondary": "#9333EA",
+    "text": "#FFFFFF",
+    "description": "深邃神秘的深紫渐变"
+  },
+  "青色渐变": {
+    "name": "青色渐变",
+    "primary": "#0891B2",
+    "secondary": "#06B6D4",
+    "text": "#FFFFFF",
+    "description": "清冷高级的青色渐变"
+  },
+  "玫瑰渐变": {
+    "name": "玫瑰渐变",
+    "primary": "#E11D48",
+    "secondary": "#F43F5E",
+    "text": "#FFFFFF",
+    "description": "浪漫热烈的玫瑰渐变"
+  },
+  "金色渐变": {
+    "name": "金色渐变",
+    "primary": "#D97706",
+    "secondary": "#F59E0B",
+    "text": "#FFFFFF",
+    "description": "奢华温暖的金色渐变"
+  }
+}
