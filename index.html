@@ -47,26 +47,6 @@
             font-size: 14px;
         }
 
-        .commodity-icon {
-            font-size: 20px;
-            margin-right: 8px;
-        }
-
-        .refresh-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .refresh-btn:hover {
-            background: #764ba2;
-        }
-
         .content {
             padding: 30px;
         }
@@ -319,6 +299,37 @@
             </div>
 
             <div class="section">
+                <div class="section-title">补仓计算器</div>
+                <p>根据当前持仓和预期成本价，计算需要补仓买入的数量</p>
+                <div class="form-row" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>成本价（元）</label>
+                        <input type="number" id="supBuyPrice" placeholder="例如：10.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>持仓数量（股）</label>
+                        <input type="number" id="supCurrentQuantity" placeholder="例如：1000" step="1" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>当前价格（元）</label>
+                        <input type="number" id="supCurrentPrice" placeholder="例如：8.50" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>预期成本价（元）</label>
+                        <input type="number" id="supTargetCost" placeholder="例如：9.00" step="0.01" min="0">
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateSupplement()" style="margin-top: 0;">计算补仓数量</button>
+                <div id="supplementResults" class="results" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        请填写完整信息后点击计算补仓数量按钮
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
                 <div class="section-title">今日涨跌停计算</div>
                 <div class="form-row">
                     <div class="form-group">
@@ -405,7 +416,13 @@
                 profit = (tradePrice - currentCost) * tradeQuantity;
                 profitPercent = ((tradePrice - currentCost) / currentCost * 100);
                 newQuantity = currentQuantity - tradeQuantity;
-                newCost = newQuantity > 0 ? currentCost : 0;
+                if (newQuantity > 0) {
+                    const totalCost = currentCost * currentQuantity;
+                    const remainingCost = totalCost - tradePrice * tradeQuantity;
+                    newCost = remainingCost / newQuantity;
+                } else {
+                    newCost = 0;
+                }
                 marketValue = newQuantity > 0 ? newCost * newQuantity : 0;
                 tradeSummary = `卖出 ${tradeQuantity} 股 @ ${tradePrice.toFixed(2)} 元，盈亏 ${profit >= 0 ? '+' : ''}${profit.toFixed(2)} 元 (${profitPercent >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%)`;
             }
@@ -437,6 +454,96 @@
                 <div class="summary">
                     <div class="summary-title">📝 交易摘要</div>
                     <div class="summary-content">${tradeSummary}</div>
+                </div>
+            `;
+        }
+
+        function calculateSupplement() {
+            const buyPrice = parseFloat(document.getElementById('supBuyPrice').value);
+            const currentQuantity = parseInt(document.getElementById('supCurrentQuantity').value);
+            const currentPrice = parseFloat(document.getElementById('supCurrentPrice').value);
+            const targetCost = parseFloat(document.getElementById('supTargetCost').value);
+
+            if (isNaN(buyPrice) || isNaN(currentQuantity) || isNaN(currentPrice) || isNaN(targetCost)) {
+                alert('请填写所有必填项');
+                return;
+            }
+
+            if (buyPrice <= 0 || currentQuantity <= 0 || currentPrice <= 0 || targetCost <= 0) {
+                alert('所有数值必须大于0');
+                return;
+            }
+
+            if (buyPrice <= targetCost) {
+                const resultsDiv = document.getElementById('supplementResults');
+                resultsDiv.innerHTML = `
+                    <div class="result-item">
+                        <span class="result-label">计算结果</span>
+                        <span class="result-value">成本价 ≤ 预期成本价，无需补仓</span>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-title">📝 说明</div>
+                        <div class="summary-content">
+                            成本价 ${buyPrice.toFixed(2)} 元 ≤ 预期成本价 ${targetCost.toFixed(2)} 元，您的持仓成本已经足够低，无需补仓。
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalCost = buyPrice * currentQuantity;
+            const neededQuantity = currentQuantity * (targetCost - buyPrice) / (currentPrice - targetCost);
+            
+            if (neededQuantity < 0) {
+                const resultsDiv = document.getElementById('supplementResults');
+                resultsDiv.innerHTML = `
+                    <div class="result-item">
+                        <span class="result-label">计算结果</span>
+                        <span class="result-value">无法通过买入达到目标成本价</span>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-title">📝 说明</div>
+                        <div class="summary-content">
+                            当前成本价 ${buyPrice.toFixed(2)} 元高于目标成本价 ${targetCost.toFixed(2)} 元，<br>
+                            而当前价格 ${currentPrice.toFixed(2)} 元介于两者之间。<br>
+                            在这种情况下，无法通过买入来降低成本价，需要卖出部分股票才能达到目标。
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const neededQuantityInt = Math.ceil(neededQuantity);
+            const neededAmount = neededQuantityInt * currentPrice;
+            const newTotalQuantity = currentQuantity + neededQuantityInt;
+            const newTotalCost = totalCost + neededAmount;
+            const newCost = newTotalCost / newTotalQuantity;
+
+            const resultsDiv = document.getElementById('supplementResults');
+            resultsDiv.innerHTML = `
+                <div class="result-item">
+                    <span class="result-label">需要买入数量</span>
+                    <span class="result-value highlight">${neededQuantityInt} 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">需要投入资金</span>
+                    <span class="result-value">${neededAmount.toFixed(2)} 元</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">补仓后总持股</span>
+                    <span class="result-value">${newTotalQuantity} 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">补仓后成本价</span>
+                    <span class="result-value">${newCost.toFixed(4)} 元</span>
+                </div>
+                <div class="summary">
+                    <div class="summary-title">📝 说明</div>
+                    <div class="summary-content">
+                        当前持仓：${currentQuantity} 股，成本价 ${buyPrice.toFixed(2)} 元<br>
+                        当前价格：${currentPrice.toFixed(2)} 元，预期成本价：${targetCost.toFixed(2)} 元<br>
+                        需要买入 ${neededQuantityInt} 股（精确计算：${neededQuantity.toFixed(2)} 股），补仓后成本价将降至 ${newCost.toFixed(4)} 元，接近预期成本价 ${targetCost.toFixed(2)} 元。
+                    </div>
                 </div>
             `;
         }
@@ -494,8 +601,6 @@
                 </div>
             `;
         }
-
-
 
         document.querySelectorAll('input').forEach(input => {
             input.addEventListener('keypress', function(e) {
